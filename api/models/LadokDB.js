@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const moduleSchema = new mongoose.Schema({
     title: String,
     grade: String,
+    date: String,
 });
 
 // Course Schema
