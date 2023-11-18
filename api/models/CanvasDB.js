@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const assignmentSchema = new mongoose.Schema({
     title: String,
     grade: String,
+    course: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+    },
 });
 
 const courseSchema = new mongoose.Schema({
