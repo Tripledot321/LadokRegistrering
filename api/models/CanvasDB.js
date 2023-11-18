@@ -1,9 +1,35 @@
 const mongoose = require('mongoose');
 
-const canvasSchema = mongoose.Schema({
-    _id: mongoose.Types.ObjectId,
-    firstName: String,
-    lastName: String
+const assignmentSchema = new mongoose.Schema({
+    title: String,
+    grade: String,
 });
 
-module.exports = mongoose.model('CanvasStudent', canvasSchema);
+const courseSchema = new mongoose.Schema({
+    courseCode: {
+        type: String,
+        unique: true,
+    },
+});
+
+const canvasStudentSchema = mongoose.Schema({
+    _id: mongoose.Schema.Types.ObjectId,
+    firstName: String,
+    lastName: String,
+    studentId: String,
+    courses: [
+        {
+            course: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Course',
+            },
+            grades: [String],
+    },
+            ],
+});
+
+const Assignment = mongoose.model('Assignment', assignmentSchema);
+const Course = mongoose.model('Course', courseSchema);
+const CanvasStudent = mongoose.model('CanvasStudent', canvasStudentSchema);
+
+module.exports = { Assignment, Course, CanvasStudent };
