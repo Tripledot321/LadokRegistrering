@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Course Assignments
 const assignmentSchema = new mongoose.Schema({
     title: String,
     grade: String,
@@ -9,6 +10,7 @@ const assignmentSchema = new mongoose.Schema({
     },
 });
 
+//Courses
 const courseSchema = new mongoose.Schema({
     courseCode: {
         type: String,
@@ -16,6 +18,7 @@ const courseSchema = new mongoose.Schema({
     },
 });
 
+//Student Course grades
 const canvasStudentSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     firstName: String,
