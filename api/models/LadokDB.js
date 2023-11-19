@@ -35,6 +35,6 @@ const ladokStudentSchema = new mongoose.Schema({
 
 const Module = mongoose.model('Module', moduleSchema);
 const Course = mongoose.model('Course', courseSchema);
-const Student = mongoose.model('Student', studentSchema);
+const Student = mongoose.model('Student', ladokStudentSchema);
 
 module.exports = { Module, Course, Student };
