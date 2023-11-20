@@ -1,42 +1,47 @@
 const mongoose = require('mongoose');
 
-// Course Assignments
-const assignmentSchema = new mongoose.Schema({
-    title: String,
-    grade: String,
-    course: {
+// CanvasStudent
+const canvasStudentSchema = new mongoose.Schema({
+    _id: { type: String, alias: 'studentId' },
+    name: String,
+});
+
+// CanvasCourse
+const canvasCourseSchema = new mongoose.Schema({
+    _id: { type: String, alias: 'courseId' },
+    courseName: String,
+    assignments: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Course',
-    },
+        ref: 'Assignment',
+    }],
 });
 
-//Courses
-const courseSchema = new mongoose.Schema({
-    courseCode: {
-        type: String,
-        unique: true,
-    },
+// Assignments
+const assignmentSchema = new mongoose.Schema({
+    _id: { type: String, alias: 'assignmentId' },
+    assignment: String,
 });
 
-//Student Course grades
-const canvasStudentSchema = mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
-    firstName: String,
-    lastName: String,
-    studentId: String,
-    courses: [
-        {
-            course: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Course',
-            },
-            grades: [String],
+// CanvasStudentResult
+const canvasStudentResultSchema = new mongoose.Schema({
+    studentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CanvasStudent',
     },
-            ],
-});
+    courseId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CanvasCourse',
+    },
+    assignmentIds: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Assignment',
+    }],
+    Grade: String,
+})
 
-const Assignment = mongoose.model('Assignment', assignmentSchema);
-const Course = mongoose.model('Course', courseSchema);
 const CanvasStudent = mongoose.model('CanvasStudent', canvasStudentSchema);
+const CanvasCourse = mongoose.model('CanvasCourse', canvasCourseSchema);
+const Assignment = mongoose.model('Assignment', assignmentSchema);
+const CanvasStudentResult = mongoose.model('CanvasStudentResult', canvasStudentResultSchema);
 
-module.exports = { Assignment, Course, CanvasStudent };
+module.exports = { CanvasStudent, CanvasCourse, Assignment, CanvasStudentResult };
