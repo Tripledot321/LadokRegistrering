@@ -1,18 +1,17 @@
 const mongoose = require('mongoose');
 
-epokCourseSchema = new mongoose.Schema({
-    _id: { type: String, alias: 'courseId' },
-    courseName: String,
-    moduleIds: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'EpokModule'
-    }], 
-}, { default: { moduleIds: [] } }); // moduleIds =  default an empty array
+const epokCourseSchema = new mongoose.Schema({
+  _id: { type: String, alias: 'courseId' },
+  courseName: String,
+  moduleIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'EpokModule'
+  }],
+}, { default: { moduleIds: [] } });
 
-
-epokModuleSchema = new mongoose.Schema({
-    _id: { type: String, alias: 'moduleId' },
-    moduleName: String,
+const epokModuleSchema = new mongoose.Schema({
+  _id: { type: String, alias: 'moduleId' },
+  moduleName: String,
 });
 
 const EpokCourse = mongoose.model('EpokCourse', epokCourseSchema);
