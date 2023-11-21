@@ -3,7 +3,7 @@ const { EpokCourse, EpokModule } = require('./api/models/EpokDB');
 
 mongoose.connect('mongodb+srv://user123:4KnNlLNdbNcnRnCR@cluster0.sdivnpi.mongodb.net/', {});
 
-const populateData = async () => {
+const populateDataEpok = async () => {
   // sample EpokCourse1
   const epokCourse1 = new EpokCourse({
     _id: 'D0031N',
@@ -53,5 +53,17 @@ const populateData = async () => {
   console.log('dummy data successful');
   mongoose.connection.close();
 };
+const populateData = async (db) => {
+    switch (db) {
+      case 'epok':
+        await populateDataEpok();
+        break;
+      // add for ladok, its
+      default:
+        console.log('usage: node dummyData.js epok|ladok|its');
+        process.exit(1);
+    }
+  };
+const db = process.argv[2];
 
-populateData();
+populateData(db);
