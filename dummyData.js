@@ -4,7 +4,7 @@ const { EpokCourse, EpokModule } = require('./api/models/EpokDB');
 mongoose.connect('mongodb+srv://user123:4KnNlLNdbNcnRnCR@cluster0.sdivnpi.mongodb.net/', {});
 
 const populateDataEpok = async () => {
-  // sample EpokCourse1
+  // add course
   const epokCourse1 = new EpokCourse({
     _id: 'D0031N',
     courseName: 'EA&SOA',
@@ -21,7 +21,7 @@ const populateDataEpok = async () => {
     moduleName: 'Projects',
   });
 
-  // Add modules to the EpokCourse
+  // add modules to course
   epokCourse1.moduleIds.push(module1, module2);
 
   const epokCourse2 = new EpokCourse({
@@ -58,7 +58,7 @@ const populateData = async (db) => {
       case 'epok':
         await populateDataEpok();
         break;
-      // add for ladok, its
+      // add cases for ladok, its
       default:
         console.log('usage: node dummyData.js epok|ladok|its');
         process.exit(1);
