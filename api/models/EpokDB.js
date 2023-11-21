@@ -3,11 +3,12 @@ const mongoose = require('mongoose');
 epokCourseSchema = new mongoose.Schema({
     _id: { type: String, alias: 'courseId' },
     courseName: String,
-    moduleIds: {
+    moduleIds: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'EpokModule'
-    },
-});
+    }], 
+}, { default: { moduleIds: [] } }); // Ensure moduleIds is an array with a default value of an empty array
+
 
 epokModuleSchema = new mongoose.Schema({
     _id: { type: String, alias: 'moduleId' },
