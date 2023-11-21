@@ -7,7 +7,7 @@ epokCourseSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'EpokModule'
     }], 
-}, { default: { moduleIds: [] } }); // Ensure moduleIds is an array with a default value of an empty array
+}, { default: { moduleIds: [] } }); // moduleIds =  default an empty array
 
 
 epokModuleSchema = new mongoose.Schema({
