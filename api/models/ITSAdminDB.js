@@ -7,4 +7,4 @@ itsStudentSchema = new mongoose.Schema({
 
 const ItsStudent = mongoose.model('ItsStudent', itsStudentSchema);
 
-module.exports = 'ItsStudent';
+module.exports = ItsStudent;
