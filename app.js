@@ -4,9 +4,17 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
+async function connectToDatabase() {
+  try {
 mongoose.connect('mongodb+srv://user123:4KnNlLNdbNcnRnCR@cluster0.sdivnpi.mongodb.net/', {
-  useMongoClient: true
+   //useMongoClient: true
 });
+console.log('Connected to database');
+} catch (error) {
+  console.error('Connection error:', error);
+}
+}
+connectToDatabase();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -29,5 +37,8 @@ app.get('/', (req, res) => {
 
 const epokRouter = require('./api/routes/Epok');
 app.use('/epok', epokRouter);
+
+const itsRouter = require('./api/routes/ITSAdmin');
+app.use('/ITSAdmin', itsRouter);
 
 module.exports = app;
