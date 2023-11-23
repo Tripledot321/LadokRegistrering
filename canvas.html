@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  
+  <form id="studentResultForm">
+    <label for="studentId">StudentID:</label>
+    <input type="text" id="studentId" name="studentId" required>
+    <button type="button" onclick="getStudentResult()">Hämta Studentresultat</button>
+  </form>
+
+  <div id="resultContainer"></div>
+
+  <script>
+    async function getStudentResult() {
+      const studentId = document.getElementById('studentId').value;
+
+      try {
+        const response = await fetch(`http://localhost:3000/canvas/get_StudentResult?studentId=${studentId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          displayResults(data);
+        } else {
+          displayError(data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        displayError('Internal Server Error');
+      }
+    }
+
+    function displayResults(data) {
+      const resultContainer = document.getElementById('resultContainer');
+      resultContainer.innerHTML = '';
+
+      if (data.studentResults && data.studentResults.length > 0) {
+        const resultList = document.createElement('ul');
+
+        data.studentResults.forEach(result => {
+          const listItem = document.createElement('li');
+          listItem.textContent = `Kurskod: ${result.CourseCode}, AssignmentID: ${result.AssignmentID.join(', ')}, Grade: ${result.Grade}`;
+          resultList.appendChild(listItem);
+        });
+
+        resultContainer.appendChild(resultList);
+      } else {
+        resultContainer.textContent = 'No results found for the student.';
+      }
+    }
+
+    function displayError(message) {
+      const resultContainer = document.getElementById('resultContainer');
+      resultContainer.innerHTML = `<p style="color: red;">Error: ${message}</p>`;
+    }
+  </script>
+</body>
+</html>
