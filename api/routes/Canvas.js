@@ -1,16 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const { CanvasStudentResult } = require('../models/CanvasDB');
+const { CanvasStudentResult, Assignment } = require('../models/CanvasDB');
 
 router.get('/get_StudentResult', async (req, res) => {
   try {
     const studentId = req.query.studentId;
     console.log('Input studentId:', studentId);
 
-    // query the database to get student results
+    // query db for student results
     const studentResults = await CanvasStudentResult.find({ studentId })
-      .populate('courseId', 'courseName')
-      .populate('assignmentIds', 'assignment');
+      .populate({
+        path: 'courseId',
+        select: 'courseName',
+      })
+      .populate({
+        path: 'assignmentIds',
+        select: 'assignment date',
+        populate: {
+          path: 'assignment',
+          select: 'assignment date',
+        },
+      });
 
     if (!studentResults || studentResults.length === 0) {
       return res.status(404).json({
@@ -18,10 +28,14 @@ router.get('/get_StudentResult', async (req, res) => {
       });
     }
 
-    // respond with student results
+    // response
     const formattedResults = studentResults.map(result => ({
-      CourseCode: result.courseId._id,
-      AssignmentID: result.assignmentIds.map(assignment => assignment._id),
+      CourseCode: result.courseId && result.courseId._id,
+      AssignmentID: result.assignmentIds.map(assignment => ({
+        _id: assignment.assignment && assignment.assignment._id,
+        assignment: assignment.assignment && assignment.assignment.assignment,
+        date: assignment.assignment && assignment.assignment.date,
+      })),
       Grade: result.Grade,
     }));
 

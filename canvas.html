@@ -6,11 +6,11 @@
 </head>
 <body>
   
-  <form id="studentResultForm">
-    <label for="studentId">StudentID:</label>
-    <input type="text" id="studentId" name="studentId" required>
-    <button type="button" onclick="getStudentResult()">Hämta Studentresultat</button>
-  </form>
+    <form id="studentResultForm">
+        <label for="studentId">StudentID:</label>
+        <input type="text" id="studentId" name="studentId" required>
+        <button type="button" onclick="getStudentResult()">Hämta Studentresultat</button>
+     </form>
 
   <div id="resultContainer"></div>
 
@@ -42,7 +42,7 @@
 
         data.studentResults.forEach(result => {
           const listItem = document.createElement('li');
-          listItem.textContent = `Kurskod: ${result.CourseCode}, AssignmentID: ${result.AssignmentID.join(', ')}, Grade: ${result.Grade}`;
+          listItem.textContent = `Kurskod: ${result.CourseCode}, AssignmentID: [${result.AssignmentID.join(', ')}], Grade: ${result.Grade}`;
           resultList.appendChild(listItem);
         });
 
