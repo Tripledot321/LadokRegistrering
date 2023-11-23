@@ -42,4 +42,7 @@ app.use('/epok', epokRouter);
 const itsRouter = require('./api/routes/ITSAdmin');
 app.use('/ITSAdmin', itsRouter);
 
+const canvasRouter = require('./api/routes/Canvas');
+app.use('/canvas', canvasRouter);
+
 module.exports = app;
