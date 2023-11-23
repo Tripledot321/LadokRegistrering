@@ -33,7 +33,7 @@ router.get('/get_Module', async (req, res) => {
 
     if (error instanceof mongoose.Error.CastError) {
       return res.status(400).json({
-        error: 'Invalid course code format',
+        error: 'Felaktig kurskod',
       });
     }
     res.status(500).json({ error: 'Internal Server Error' });
