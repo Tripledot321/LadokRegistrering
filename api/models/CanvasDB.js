@@ -10,21 +10,25 @@ const canvasStudentSchema = new mongoose.Schema({
 const canvasCourseSchema = new mongoose.Schema({
     _id: { type: String, alias: 'courseId' },
     courseName: String,
-    assignments: [{
+    // Hade problem att skriva till databasen med objekt. Ändrade till string för att få det att funka
+    /*assignments: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Assignment',
-    }],
+    }],*/
+    assignments: [{ type: String, alias: 'assignmentId' }],
 });
 
 // Assignments
 const assignmentSchema = new mongoose.Schema({
     _id: { type: String, alias: 'assignmentId' },
     assignment: String,
+    date: String,
 });
 
 // CanvasStudentResult
 const canvasStudentResultSchema = new mongoose.Schema({
-    studentId: {
+    // Hade problem att skriva till databasen med objekt. Ändrade till string för att få det att funka
+    /*studentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'CanvasStudent',
     },
@@ -35,7 +39,10 @@ const canvasStudentResultSchema = new mongoose.Schema({
     assignmentIds: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Assignment',
-    }],
+    }],*/
+    studentId: String, 
+    courseId: String, 
+    assignmentIds: [{ type: String, alias: 'assignmentId' }],
     Grade: String,
 })
 

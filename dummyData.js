@@ -1,7 +1,53 @@
 const mongoose = require('mongoose');
 const { EpokCourse, EpokModule } = require('./api/models/EpokDB');
+const { CanvasStudent, CanvasCourse, Assignment, CanvasStudentResult } = require('./api/models/CanvasDB');
 
 mongoose.connect('mongodb+srv://user123:4KnNlLNdbNcnRnCR@cluster0.sdivnpi.mongodb.net/', {});
+
+const populateDataCanvas = async () => {
+    /* För felsökning/omkörning av skript
+    // clear existing
+    await Promise.all([
+        CanvasStudent.deleteMany({}),
+        CanvasCourse.deleteMany({}),
+        Assignment.deleteMany({}),
+        CanvasStudentResult.deleteMany({}),
+    ]);
+    */
+    const canvasStudents = [
+        { _id: 'vikese-0', name: 'Viktor' },
+        { _id: 'gushol-2', name: 'Gustav' },
+    ];
+    const canvasCourses = [
+        {
+            _id: 'D0031N',
+            courseName: 'EA&SOA',
+            assignments: [],
+        },
+    ];
+    const assignments = [
+        { _id: 'D0031N-1', assignment: 'Examinationsuppgift 1', date: '2023-09-25' },
+        { _id: 'D0031N-2', assignment: 'Examinationsuppgift 2', date: '2023-10-23' },
+    ];
+    const canvasStudentResults = [
+        { studentId: 'vikese-0', courseId: 'D0031N', assignmentIds: ['D0031N-1', 'D0031N-2'], Grade: 'G' },
+        { studentId: 'gushol-2', courseId: 'D0031N', assignmentIds: ['D0031N-1', 'D0031N-2'], Grade: 'U' },
+    ];
+    // insert assignments and get their objects
+    const assignmentObjects = await Assignment.insertMany(assignments);
+    // update course with assignment objects
+    canvasCourses[0].assignments = assignmentObjects.map(assignment => assignment._id);
+
+    // save to db
+    await Promise.all([
+        CanvasStudent.insertMany(canvasStudents),
+        CanvasCourse.insertMany(canvasCourses),
+        CanvasStudentResult.insertMany(canvasStudentResults),
+    ]);
+
+    console.log('dummy data CANVAS successful');
+    mongoose.connection.close();
+};
 
 const populateDataEpok = async () => {
   // add course
@@ -50,7 +96,7 @@ const populateDataEpok = async () => {
   await module3.save();
   await module4.save();
 
-  console.log('dummy data successful');
+  console.log('dummy data EPOK successful');
   mongoose.connection.close();
 };
 const populateData = async (db) => {
@@ -59,8 +105,11 @@ const populateData = async (db) => {
         await populateDataEpok();
         break;
       // add cases for ladok, its
+      case 'canvas':
+        await populateDataCanvas();
+        break;
       default:
-        console.log('usage: node dummyData.js epok|ladok|its');
+        console.log('usage: node dummyData.js epok|ladok|its|canvas');
         process.exit(1);
     }
   };
