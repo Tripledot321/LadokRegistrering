@@ -5,7 +5,7 @@ ladokStudentResultSchema = new mongoose.Schema({
     courseCode: String,
     module: String,
     date: Date,
-    Grade: String,
+    grade: String,
 });
 
 const LadokStudentResult = new mongoose.model('LadokStudentResult', ladokStudentResultSchema);

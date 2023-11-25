@@ -4,7 +4,6 @@ const epokCourseSchema = new mongoose.Schema({
   _id: { type: String, alias: 'courseId' },
   courseName: String,
   moduleIds: [{
-    //type: mongoose.Schema.Types.ObjectId,
     type: String,
     ref: 'EpokModule'
   }],
