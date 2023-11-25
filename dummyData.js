@@ -5,15 +5,14 @@ const { CanvasStudent, CanvasCourse, Assignment, CanvasStudentResult } = require
 mongoose.connect('mongodb+srv://user123:4KnNlLNdbNcnRnCR@cluster0.sdivnpi.mongodb.net/', {});
 
 const populateDataCanvas = async () => {
-    /* För felsökning/omkörning av skript
+  
     // clear existing
-    await Promise.all([
-        CanvasStudent.deleteMany({}),
-        CanvasCourse.deleteMany({}),
-        Assignment.deleteMany({}),
-        CanvasStudentResult.deleteMany({}),
-    ]);
-    */
+    // await Promise.all([
+    //     CanvasStudent.deleteMany({}),
+    //     CanvasCourse.deleteMany({}),
+    //     Assignment.deleteMany({}),
+    //     CanvasStudentResult.deleteMany({}),
+    // ]);
     const canvasStudents = [
         { _id: 'vikese-0', name: 'Viktor' },
         { _id: 'gushol-2', name: 'Gustav' },
@@ -26,12 +25,18 @@ const populateDataCanvas = async () => {
         },
     ];
     const assignments = [
-        { _id: 'D0031N-1', assignment: 'Examinationsuppgift 1', date: '2023-09-25' },
-        { _id: 'D0031N-2', assignment: 'Examinationsuppgift 2', date: '2023-10-23' },
+        { _id: 'D0031N-1', assignment: 'Examinationsuppgift 1'},
+        { _id: 'D0031N-2', assignment: 'Examinationsuppgift 2'},
     ];
     const canvasStudentResults = [
-        { studentId: 'vikese-0', courseId: 'D0031N', assignmentIds: ['D0031N-1', 'D0031N-2'], Grade: 'G' },
-        { studentId: 'gushol-2', courseId: 'D0031N', assignmentIds: ['D0031N-1', 'D0031N-2'], Grade: 'U' },
+      { studentId: 'vikese-0', courseId: 'D0031N', grades: [
+        { assignmentId: 'D0031N-1', grade: 'G' },
+        { assignmentId: 'D0031N-2', grade: 'G' },
+      ]},
+      { studentId: 'gushol-2', courseId: 'D0031N', grades: [
+        { assignmentId: 'D0031N-1', grade: 'G' },
+        { assignmentId: 'D0031N-2', grade: 'U' },
+      ]},
     ];
     // insert assignments and get their objects
     const assignmentObjects = await Assignment.insertMany(assignments);
