@@ -6,10 +6,13 @@
     <title>Betygsregistrering</title>
 </head>
 <body>
-    <label for="courseCodeDropdown">Välj Kurs:</label>
+    <label for="courseCodeDropdown">Kurskod:</label>
     <select id="courseCodeDropdown"></select>
-    <label for="moduleDropdown">Välj Modul:</label>
+    <label for "canvasAssignment">Uppgift i Canvas:</label>
+    <select id="canvasAssignment"></select>
+    <label for="moduleDropdown">Modul i Ladok:</label>
     <select id="moduleDropdown"></select>
+    <ul id="studentList"></ul>
 
 <script>
     async function getCourseCodes() {
@@ -37,17 +40,115 @@
 
         courses.forEach(course => {
             const option = document.createElement('option');
-            option.value = course; // Update to access 'courseId' property
-            option.text = course; // Update to access 'courseName' property
+            option.value = course;
+            option.text = course;
             courseCodeDropdown.appendChild(option);
         });
+        // Add event listener for course selection
+        courseCodeDropdown.addEventListener('change', () => {
+        const selectedCourseCode = courseCodeDropdown.value;
+        getModulesForCourse(selectedCourseCode);
+        });
+
+        // Initial call to getModulesForCourse with the default course code (empty string)
+        getModulesForCourse('');
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
-getCourseCodes();
+async function getModulesForCourse(courseCode) {
+    try {
+        // Fetch modules based on the selected courseCode
+        const response = await fetch(`http://localhost:3000/epok/get_Module?courseCode=${courseCode}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
+        // Parse the response
+        const data = await response.json();
+        console.log('Modules:', data.activeModules);
+
+        // Populate the module dropdown
+        const moduleDropdown = document.getElementById('moduleDropdown');
+        moduleDropdown.innerHTML = '';
+
+        // Add default option
+        const defaultModuleOption = document.createElement('option');
+        defaultModuleOption.value = ''; // Adjust to your needs
+        defaultModuleOption.text = '- Välj Modul -';
+        moduleDropdown.appendChild(defaultModuleOption);
+
+        // Check if activeModules is defined before using it
+        if (data.activeModules) {
+            // Populate the dropdown with module data
+            data.activeModules.forEach(module => {
+                const moduleOption = document.createElement('option');
+                moduleOption.value = module.Code; // Adjust to access the appropriate property
+                moduleOption.text = module.Description; // Adjust to access the appropriate property
+                moduleDropdown.appendChild(moduleOption);
+            });
+        } else {
+            console.error('No module data found.');
+        }
+
+    } catch (error) {
+        console.error('Error fetching modules for the course:', error);
+    }
+}
+
+function updateStudentList() {
+    const studentList = document.getElementById('studentList');
+    studentList.innerHTML = '';
+
+    // Dummy data
+    const studentsData = [
+        { name: 'John Doe', canvasGrade: 'A', ladokGrade: 'VG', examDate: '2023-01-01', status: 'Completed', info: 'Details 1' },
+        { name: 'Jane Smith', canvasGrade: 'B', ladokGrade: 'G', examDate: '2023-01-15', status: 'In Progress', info: 'Details 2' },
+        // Add more student data as needed
+    ];
+
+    // Add field names at the top
+    const fieldNames = ['Namn', 'Omdöme i Canvas', 'Betyg i Ladok', 'Examinationsdatum', 'Status', 'Information'];
+    const fieldNamesRow = document.createElement('li');
+    fieldNamesRow.style.display = 'flex';
+    fieldNamesRow.style.listStyle = 'none'; // Remove default list styling
+
+    fieldNames.forEach(fieldName => {
+        const fieldNameElement = document.createElement('div');
+        fieldNameElement.style.flex = '1'; // Make each column equally distributed
+        fieldNameElement.innerHTML = `<strong>${fieldName}:</strong>`;
+        fieldNamesRow.appendChild(fieldNameElement);
+    });
+
+    studentList.appendChild(fieldNamesRow);
+
+    // Add student data
+    studentsData.forEach(student => {
+        const listItem = document.createElement('li');
+        listItem.style.display = 'flex';
+        listItem.style.listStyle = 'none'; // Remove default list styling
+
+        Object.values(student).forEach(value => {
+            const dataElement = document.createElement('div');
+            dataElement.style.flex = '1'; // Make each column equally distributed
+            dataElement.style.marginRight = '20px';
+            dataElement.innerHTML = `${value}`;
+            listItem.appendChild(dataElement);
+        });
+
+        studentList.appendChild(listItem);
+    });
+}
+// Initial call to display the dummy student list
+updateStudentList();
+
+
+
+
+getCourseCodes();
+updateStudentList();
 </script>
 </body>
 </html>
