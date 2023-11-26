@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Betygsregistrering</title>
+</head>
+<body>
+    <label for="courseCodeDropdown">Välj Kurs:</label>
+    <select id="courseCodeDropdown"></select>
+    <label for="moduleDropdown">Välj Modul:</label>
+    <select id="moduleDropdown"></select>
+
+<script>
+    async function getCourseCodes() {
+    try {
+        const response = await fetch('http://localhost:3000/epok/get_AllCourseCodes');
+        console.log('Response:', response);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Data:', data);
+
+        const courses = data.courseCodes; // Update to access 'courses' property
+
+        const courseCodeDropdown = document.getElementById('courseCodeDropdown');
+        courseCodeDropdown.innerHTML = '';
+
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = ''; // Adjust to your needs
+        defaultOption.text = '- Välj Kurs -';
+        courseCodeDropdown.appendChild(defaultOption);
+
+        courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course; // Update to access 'courseId' property
+            option.text = course; // Update to access 'courseName' property
+            courseCodeDropdown.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+getCourseCodes();
+
+</script>
+</body>
+</html>
+

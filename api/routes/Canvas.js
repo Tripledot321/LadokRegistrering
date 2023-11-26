@@ -14,7 +14,7 @@ router.get('/get_StudentResult', async (req, res) => {
         select: 'courseName',
       })
       .populate({
-        path: 'assignmentIds',
+        path: 'grades',
         populate: {
           path: 'assignment',
         },
@@ -29,9 +29,9 @@ router.get('/get_StudentResult', async (req, res) => {
     // response
     const formattedResults = studentResults.map(result => ({
       CourseCode: result.courseId && result.courseId._id,
-      AssignmentID: result.assignmentIds.map(assignment => ({
+      AssignmentID: result.grades.map(assignment => ({
         _id: assignment.assignment && assignment.assignment._id,
-        assignment: assignment.assignment && assignment.assignment.assignment,
+        assignment: assignment.grades && assignment.grades,
       })),
       Grade: result.Grade,
     }));

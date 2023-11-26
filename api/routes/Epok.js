@@ -3,6 +3,22 @@ const mongoose = require('mongoose');
 const router = express.Router();
 const { EpokCourse, EpokModule } = require('../models/EpokDB');
 
+router.get('/get_AllCourseCodes', async (req, res) => {
+  try {
+      // Query the database for all course codes
+      const allCourseCodes = await EpokCourse.find({}, '_id');
+
+      // Respond with all course codes
+      res.status(200).json({
+          courseCodes: allCourseCodes.map(course => course._id),
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 router.get('/get_Module', async (req, res) => {
   try {
     const courseCode = req.query.courseCode;
