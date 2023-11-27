@@ -11,14 +11,15 @@ const canvasStudentSchema = new mongoose.Schema({
 const canvasCourseSchema = new mongoose.Schema({
     _id: { type: String, alias: 'courseId' },
     courseName: String,
-    assignments: [{ type: String, alias: 'assignmentId' }],
-});
+    assignments: [{ type: String, ref: 'Assignment', alias: 'assignmentId' }],
+  });
 
 // Assignments
 const assignmentSchema = new mongoose.Schema({
     _id: { type: String, alias: 'assignmentId' },
     assignment: String,
-});
+    courseId: { type: String, ref: 'CanvasCourse' },
+  });
 
 // CanvasStudentResult
 const canvasStudentResultSchema = new mongoose.Schema({

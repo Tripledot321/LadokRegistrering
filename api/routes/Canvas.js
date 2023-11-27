@@ -2,6 +2,22 @@ const express = require('express');
 const router = express.Router();
 const { CanvasStudentResult, Assignment } = require('../models/CanvasDB');
 
+router.get('/get_Assignments', async (req, res) => {
+  try {
+    const courseId = req.query.courseId;
+    console.log('Input CourseId:', courseId);
+
+    const assignments = await Assignment.find({ courseId: courseId });
+
+    res.status(200).json({
+      assignments: assignments,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 router.get('/get_StudentResult', async (req, res) => {
   try {
     const studentId = req.query.studentId;
