@@ -48,10 +48,12 @@
         courseCodeDropdown.addEventListener('change', () => {
         const selectedCourseCode = courseCodeDropdown.value;
         getModulesForCourse(selectedCourseCode);
+        getAssignmentsForCourse(selectedCourseCode);
         });
 
         // Initial call to getModulesForCourse with the default course code (empty string)
         getModulesForCourse('');
+        getAssignmentsForCourse('');
     } catch (error) {
         console.error('Error:', error);
     }
@@ -115,17 +117,17 @@ async function getAssignmentsForCourse(courseCode) {
         assignmentDropdown.innerHTML = '';
 
         // Add default option
-        const defaultModuleOption = document.createElement('option');
-        defaultModuleOption.value = ''; // Adjust to your needs
-        defaultModuleOption.text = '- Välj Assignments -';
-        moduleDropdown.appendChild(defaultModuleOption);
+        const defaultAssignmentOption = document.createElement('option');
+        defaultAssignmentOption.value = ''; // Adjust to your needs
+        defaultAssignmentOption.text = '- Välj Assignments -';
+        assignmentDropdown.appendChild(defaultAssignmentOption);
 
         // Check if activeModules is defined before using it
         if (data.assignments) {
             data.assignments.forEach(assignment => {
             const assignmentOption = document.createElement('option');
-            assignmentOption.value = assignment.AssignmentId;
-            assignmentOption.text = assignment.Assignment;
+            assignmentOption.value = assignment.assignmentId;
+            assignmentOption.text = assignment.assignment;
             assignmentDropdown.appendChild(assignmentOption);
             });
         } else {
