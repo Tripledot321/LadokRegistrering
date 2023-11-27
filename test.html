@@ -9,7 +9,7 @@
     <label for="courseCodeDropdown">Kurskod:</label>
     <select id="courseCodeDropdown"></select>
     <label for="assignmentDropdown">Uppgift i Canvas:</label>
-    <select id="assignmentDropdown"></select>
+    <select id="assignmentDropdown" multiple></select>
     <label for="moduleDropdown">Modul i Ladok:</label>
     <select id="moduleDropdown"></select>
     <ul id="studentList"></ul>
@@ -130,6 +130,7 @@ async function getAssignmentsForCourse(courseCode) {
             assignmentOption.text = assignment.assignment;
             assignmentDropdown.appendChild(assignmentOption);
             });
+        assignmentsDropdown.multiple = true;
         } else {
             console.error('No assignments found.');
         }

@@ -4,7 +4,7 @@ const { CanvasStudentResult, Assignment } = require('../models/CanvasDB');
 
 router.get('/get_Assignments', async (req, res) => {
   try {
-    const courseId = req.query.courseId;
+    const courseId = req.query.courseCode;
     console.log('Input CourseId:', courseId);
 
     const assignments = await Assignment.find({ courseId: courseId });

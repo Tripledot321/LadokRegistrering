@@ -25,8 +25,8 @@ const populateDataCanvas = async () => {
         },
     ];
     const assignments = [
-        { _id: 'D0031N-1', assignment: 'Examinationsuppgift 1'},
-        { _id: 'D0031N-2', assignment: 'Examinationsuppgift 2'},
+        { _id: 'D0031N-1', assignment: 'Examinationsuppgift 1', courseId: 'D0031N'},
+        { _id: 'D0031N-2', assignment: 'Examinationsuppgift 2', courseId: 'D0031N'},
     ];
     const canvasStudentResults = [
       { studentId: 'vikese-0', courseId: 'D0031N', grades: [
