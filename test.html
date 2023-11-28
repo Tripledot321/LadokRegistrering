@@ -18,7 +18,9 @@
     <label for="examDate">Examinationsdatum:</label>
     <input type="date" id="examDate" />
 
-    <button type="button" onclick="">Skicka in</button>
+    <button type="button" onclick="updateDate()">Uppdatera datum</button>
+
+    <button type="button" onclick="sendToLadok()">Skicka in</button>
 
     <ul id="studentList"></ul>
 
@@ -57,11 +59,13 @@
         const selectedCourseCode = courseCodeDropdown.value;
         getModulesForCourse(selectedCourseCode);
         getAssignmentsForCourse(selectedCourseCode);
+        getStudentsForCourse(selectedCourseCode);
         });
 
         // Initial call to getModulesForCourse with the default course code (empty string)
         getModulesForCourse('');
         getAssignmentsForCourse('');
+        getStudentsForCourse('');
     } catch (error) {
         console.error('Error:', error);
     }
@@ -148,89 +152,48 @@ async function getAssignmentsForCourse(courseCode) {
 };
 // Assignment
 
-function updateStudentList() {
-    const studentList = document.getElementById('studentList');
-    studentList.innerHTML = '';
-
-    // Dummy data
-    const studentsData = [
-        { name: 'John Doe', canvasGrade: 'A', ladokGrade: 'VG', examDate: '2023-01-01', status: 'Completed', info: 'Details 1' },
-        { name: 'Jane Smith', canvasGrade: 'B', ladokGrade: 'G', examDate: '2023-01-15', status: 'In Progress', info: 'Details 2' },
-        // Add more student data as needed
-    ];
-
-// Add field names at the top
-const fieldNames = ['Namn', 'Omdöme i Canvas', 'Betyg i Ladok', 'Examinationsdatum', 'Status', 'Information'];
-const fieldNamesRow = document.createElement('li');
-fieldNamesRow.style.display = 'flex';
-fieldNamesRow.style.listStyle = 'none'; // Remove default list styling
-
-fieldNames.forEach(fieldName => {
-    const fieldNameElement = document.createElement('div');
-    fieldNameElement.style.flex = '1'; // Make each column equally distributed
-    fieldNameElement.innerHTML = `<strong>${fieldName}:</strong>`;
-    fieldNamesRow.appendChild(fieldNameElement);
-});
-
-studentList.appendChild(fieldNamesRow);
-
-// Add student data
-studentsData.forEach(student => {
-    const listItem = document.createElement('li');
-    listItem.style.display = 'flex';
-    listItem.style.listStyle = 'none'; // Remove default list styling
-
-    // Add a div for the selectable area
-    const selectableArea = document.createElement('div');
-    selectableArea.style.width = '20px'; // Adjust width as needed
-    selectableArea.style.height = '20px'; // Adjust height as needed
-    selectableArea.style.border = '1px solid #ccc'; // Add border for styling
-    selectableArea.style.cursor = 'pointer'; // Change cursor to indicate clickability
-
-    // Add "x" button inside the selectable area
-    const selectButton = document.createElement('span');
-    selectButton.innerHTML = 'x';
-    selectButton.style.visibility = 'hidden'; // Initially hidden
-    selectButton.style.display = 'block'; // Display as a block
-    selectButton.style.margin = 'auto'; // Center the "x" inside the div
-
-    // Add click event listener to toggle visibility
-    selectableArea.addEventListener('click', () => {
-        selectButton.style.visibility = selectButton.style.visibility === 'hidden' ? 'visible' : 'hidden';
-        // Handle selection logic here if needed
-    });
-
-    // Append the "x" button to the selectable area
-    selectableArea.appendChild(selectButton);
-
-    // Append the selectable area to the list item
-    listItem.appendChild(selectableArea);
-
-    Object.entries(student).forEach(([key, value]) => {
-        const dataElement = document.createElement('div');
-        dataElement.style.flex = '1'; // Make each column equally distributed
-        dataElement.style.marginRight = '20px';
-
-        if (key === 'examDate') {
-            // If it's the "Examinationsdatum" field, use a date input
-            const dateInput = document.createElement('input');
-            dateInput.type = 'date';
-            dateInput.value = value;
-            dateInput.addEventListener('input', () => {
-                // Handle date changes if needed
-                console.log(dateInput.value);
-            });
-            dataElement.appendChild(dateInput);
-        } else {
-            dataElement.innerHTML = `${value}`;
+async function getStudentsForCourse(courseCode) {
+    try {
+        // Fetch modules based on the selected courseCode
+        const response = await fetch(`http://localhost:3000/canvas/get_Students?courseCode=${courseCode}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        listItem.appendChild(dataElement);
-    });
+        // Parse the response
+        const data = await response.json();
 
-    studentList.appendChild(listItem);
-});
+        // Populate the module dropdown
+        const studentList = document.getElementById('studentList');
+        studentList.innerHTML = '';
+
+        if (data.students) {
+            data.students.forEach(student => {
+            const studentOption = document.createElement('option');
+            studentOption.value = student.studentId;
+            studentOption.text = student.student;
+            studentList.appendChild(studentOption);
+            });
+        } else {
+            console.error('No students found.');
+        }
+    } catch (error) {
+        console.error('Error fetching students for the course:', error);
+    }
 };
+
+function updateDate() {
+        // Get the selected date
+        const selectedDate = document.getElementById('examDate').value;
+
+        // Update the date field for each student
+        const studentList = document.getElementById('studentList');
+        const dateInputs = studentList.querySelectorAll('input[type="date"]');
+        dateInputs.forEach(dateInput => {
+            dateInput.value = selectedDate;
+        });
+    }
 
 getCourseCodes();
 updateStudentList();
