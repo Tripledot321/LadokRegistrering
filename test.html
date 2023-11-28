@@ -138,7 +138,7 @@ async function getAssignmentsForCourse(courseCode) {
             assignmentOption.text = assignment.assignment;
             assignmentDropdown.appendChild(assignmentOption);
             });
-        assignmentsDropdown.multiple = true;
+        assignmentDropdown.multiple = true;
         } else {
             console.error('No assignments found.');
         }
