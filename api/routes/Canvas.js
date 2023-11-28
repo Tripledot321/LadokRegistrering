@@ -68,19 +68,23 @@ router.get('/getStudents/:courseCode/:assignmentIds', async (req, res) => {
 router.get('/get_StudentList/', async (req, res) => {
   try {
     const courseCode = req.query.courseCode;
-    console.log('Input CourseCode:', courseCode);
+    console.log('Test CourseCode:', courseCode);
 
     // query db for students
-    const students = await canvasStudentResultSchema.find({ courseId: courseCode });
-    console.log('Students:', students);
-    res.status(200).json({
-      students: students,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
- });
+    const students = await CanvasStudentResult.find({ courseId: courseCode });
+    students.forEach(student => {
+      console.log('Student ID:', student.studentId);
+      console.log('Course ID:', student.courseId);
+      console.log('Grades:', student.grades);
+      console.log('-----------------------');
+  });
+
+  res.status(200).json(students);
+} catch (error) {
+  console.error('Error fetching student list:', error);
+  res.status(500).send('Internal Server Error');
+}
+});
 /*
 router.get('/get_StudentResult', async (req, res) => {
   try {
