@@ -6,10 +6,7 @@ const cors = require('cors');
 
 async function connectToDatabase() {
   try {
-mongoose.connect('mongodb+srv://user123:4KnNlLNdbNcnRnCR@cluster0.sdivnpi.mongodb.net/', {
-   //useMongoClient: true
-   //useMongoClient: true
-});
+mongoose.connect('mongodb+srv://test123:FVJq7wW4AKEcw7Bc@cluster0.sdivnpi.mongodb.net/', {});
 console.log('Connected to database');
 } catch (error) {
   console.error('Connection error:', error);

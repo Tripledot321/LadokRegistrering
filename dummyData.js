@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { EpokCourse, EpokModule } = require('./api/models/EpokDB');
 const { CanvasStudent, CanvasCourse, Assignment, CanvasStudentResult } = require('./api/models/CanvasDB');
 
-mongoose.connect('mongodb+srv://user123:4KnNlLNdbNcnRnCR@cluster0.sdivnpi.mongodb.net/', {});
+mongoose.connect('mongodb+srv://test123:FVJq7wW4AKEcw7Bc@cluster0.sdivnpi.mongodb.net/', {});
 
 const populateDataCanvas = async () => {
   // clear existing

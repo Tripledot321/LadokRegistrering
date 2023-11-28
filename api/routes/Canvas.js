@@ -64,6 +64,23 @@ router.get('/getStudents/:courseCode/:assignmentIds', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+router.get('/get_StudentList/', async (req, res) => {
+  try {
+    const courseCode = req.query.courseCode;
+    console.log('Input CourseCode:', courseCode);
+
+    // query db for students
+    const students = await canvasStudentResultSchema.find({ courseId: courseCode });
+    console.log('Students:', students);
+    res.status(200).json({
+      students: students,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+ });
 /*
 router.get('/get_StudentResult', async (req, res) => {
   try {
