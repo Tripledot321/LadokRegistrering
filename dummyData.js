@@ -5,53 +5,66 @@ const { CanvasStudent, CanvasCourse, Assignment, CanvasStudentResult } = require
 mongoose.connect('mongodb+srv://user123:4KnNlLNdbNcnRnCR@cluster0.sdivnpi.mongodb.net/', {});
 
 const populateDataCanvas = async () => {
-  
-    // clear existing
-    // await Promise.all([
-    //     CanvasStudent.deleteMany({}),
-    //     CanvasCourse.deleteMany({}),
-    //     Assignment.deleteMany({}),
-    //     CanvasStudentResult.deleteMany({}),
-    // ]);
-    const canvasStudents = [
-        { _id: 'vikese-0', name: 'Viktor' },
-        { _id: 'gushol-2', name: 'Gustav' },
-    ];
-    const canvasCourses = [
-        {
-            _id: 'D0031N',
-            courseName: 'EA&SOA',
-            assignments: [],
-        },
-    ];
-    const assignments = [
-        { _id: 'D0031N-1', assignment: 'Examinationsuppgift 1', courseId: 'D0031N'},
-        { _id: 'D0031N-2', assignment: 'Examinationsuppgift 2', courseId: 'D0031N'},
-    ];
-    const canvasStudentResults = [
-      { studentId: 'vikese-0', courseId: 'D0031N', grades: [
-        { assignmentId: 'D0031N-1', grade: 'G' },
-        { assignmentId: 'D0031N-2', grade: 'G' },
-      ]},
-      { studentId: 'gushol-2', courseId: 'D0031N', grades: [
-        { assignmentId: 'D0031N-1', grade: 'G' },
-        { assignmentId: 'D0031N-2', grade: 'U' },
-      ]},
-    ];
-    // insert assignments and get their objects
-    const assignmentObjects = await Assignment.insertMany(assignments);
-    // update course with assignment objects
-    canvasCourses[0].assignments = assignmentObjects.map(assignment => assignment._id);
+  // clear existing
+  await Promise.all([
+      CanvasStudent.deleteMany({}),
+      CanvasCourse.deleteMany({}),
+      Assignment.deleteMany({}),
+      CanvasStudentResult.deleteMany({}),
+  ]);
 
-    // save to db
-    await Promise.all([
-        CanvasStudent.insertMany(canvasStudents),
-        CanvasCourse.insertMany(canvasCourses),
-        CanvasStudentResult.insertMany(canvasStudentResults),
-    ]);
+  const canvasStudents = [
+      { studentId: 'vikese-0', name: 'Viktor' },
+      { studentId: 'gushol-2', name: 'Gustav' },
+  ];
 
-    console.log('dummy data CANVAS successful');
-    mongoose.connection.close();
+  const canvasCourses = [
+      {
+          courseId: 'D0031N',
+          courseName: 'EA&SOA',
+          assignments: [],
+      },
+  ];
+
+  const assignments = [
+      { assignmentId: 'D0031N-1', assignment: 'Examinationsuppgift 1', courseId: 'D0031N' },
+      { assignmentId: 'D0031N-2', assignment: 'Examinationsuppgift 2', courseId: 'D0031N' },
+  ];
+
+  const canvasStudentResults = [
+      {
+          studentId: 'vikese-0',
+          courseId: 'D0031N',
+          grades: [
+              { assignmentId: 'D0031N-1', grade: 'G' },
+              { assignmentId: 'D0031N-2', grade: 'G' },
+          ],
+      },
+      {
+          studentId: 'gushol-2',
+          courseId: 'D0031N',
+          grades: [
+              { assignmentId: 'D0031N-1', grade: 'G' },
+              { assignmentId: 'D0031N-2', grade: 'U' },
+          ],
+      },
+  ];
+
+  // insert assignments and get their objects
+  const assignmentObjects = await Assignment.insertMany(assignments);
+
+  // update course with assignment objects
+  canvasCourses[0].assignments = assignmentObjects.map(assignment => assignment.assignmentId);
+
+  // save to db
+  await Promise.all([
+      CanvasStudent.insertMany(canvasStudents),
+      CanvasCourse.insertMany(canvasCourses),
+      CanvasStudentResult.insertMany(canvasStudentResults),
+  ]);
+
+  console.log('dummy data CANVAS successful');
+  mongoose.connection.close();
 };
 
 const populateDataEpok = async () => {
