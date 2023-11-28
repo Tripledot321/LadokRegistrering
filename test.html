@@ -18,8 +18,6 @@
     <label for="examDate">Examinationsdatum:</label>
     <input type="date" id="examDate" />
 
-    <button type="button" onclick="">Skicka in</button>
-
     <ul id="studentList"></ul>
 
 <script>
@@ -148,93 +146,105 @@ async function getAssignmentsForCourse(courseCode) {
 };
 // Assignment
 
-function updateStudentList() {
+async function updateStudentList() {
     const studentList = document.getElementById('studentList');
     studentList.innerHTML = '';
 
-    // Dummy data
-    const studentsData = [
-        { name: 'John Doe', canvasGrade: 'A', ladokGrade: 'VG', examDate: '2023-01-01', status: 'Completed', info: 'Details 1' },
-        { name: 'Jane Smith', canvasGrade: 'B', ladokGrade: 'G', examDate: '2023-01-15', status: 'In Progress', info: 'Details 2' },
-        // Add more student data as needed
-    ];
+    const courseCodeDropdown = document.getElementById('courseCodeDropdown');
+    const assignmentDropdown = document.getElementById('assignmentDropdown');
 
-// Add field names at the top
-const fieldNames = ['Namn', 'Omdöme i Canvas', 'Betyg i Ladok', 'Examinationsdatum', 'Status', 'Information'];
-const fieldNamesRow = document.createElement('li');
-fieldNamesRow.style.display = 'flex';
-fieldNamesRow.style.listStyle = 'none'; // Remove default list styling
+    const selectedCourseCode = courseCodeDropdown.value;
+    const selectedAssignmentOptions = assignmentDropdown.selectedOptions;
 
-fieldNames.forEach(fieldName => {
-    const fieldNameElement = document.createElement('div');
-    fieldNameElement.style.flex = '1'; // Make each column equally distributed
-    fieldNameElement.innerHTML = `<strong>${fieldName}:</strong>`;
-    fieldNamesRow.appendChild(fieldNameElement);
-});
+    const selectedAssignmentIds = Array.from(selectedAssignmentOptions, option => option.value);
 
-studentList.appendChild(fieldNamesRow);
+    console.log('Selected Course Code:', selectedCourseCode);
+    console.log('Selected Assignment IDs:', selectedAssignmentIds);
 
-// Add student data
-studentsData.forEach(student => {
-    const listItem = document.createElement('li');
-    listItem.style.display = 'flex';
-    listItem.style.listStyle = 'none'; // Remove default list styling
+    try {
+        const response = await fetch(`http://localhost:3000/canvas/getStudents/${selectedCourseCode}/${selectedAssignmentIds.join(',')}`);
 
-    // Add a div for the selectable area
-    const selectableArea = document.createElement('div');
-    selectableArea.style.width = '20px'; // Adjust width as needed
-    selectableArea.style.height = '20px'; // Adjust height as needed
-    selectableArea.style.border = '1px solid #ccc'; // Add border for styling
-    selectableArea.style.cursor = 'pointer'; // Change cursor to indicate clickability
-
-    // Add "x" button inside the selectable area
-    const selectButton = document.createElement('span');
-    selectButton.innerHTML = 'x';
-    selectButton.style.visibility = 'hidden'; // Initially hidden
-    selectButton.style.display = 'block'; // Display as a block
-    selectButton.style.margin = 'auto'; // Center the "x" inside the div
-
-    // Add click event listener to toggle visibility
-    selectableArea.addEventListener('click', () => {
-        selectButton.style.visibility = selectButton.style.visibility === 'hidden' ? 'visible' : 'hidden';
-        // Handle selection logic here if needed
-    });
-
-    // Append the "x" button to the selectable area
-    selectableArea.appendChild(selectButton);
-
-    // Append the selectable area to the list item
-    listItem.appendChild(selectableArea);
-
-    Object.entries(student).forEach(([key, value]) => {
-        const dataElement = document.createElement('div');
-        dataElement.style.flex = '1'; // Make each column equally distributed
-        dataElement.style.marginRight = '20px';
-
-        if (key === 'examDate') {
-            // If it's the "Examinationsdatum" field, use a date input
-            const dateInput = document.createElement('input');
-            dateInput.type = 'date';
-            dateInput.value = value;
-            dateInput.addEventListener('input', () => {
-                // Handle date changes if needed
-                console.log(dateInput.value);
-            });
-            dataElement.appendChild(dateInput);
-        } else {
-            dataElement.innerHTML = `${value}`;
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        listItem.appendChild(dataElement);
-    });
+        const data = await response.json();
 
-    studentList.appendChild(listItem);
-});
-};
+        const fieldNames = ['Namn', 'Omdöme i Canvas', 'Betyg i Ladok', 'Examinationsdatum', 'Status', 'Information'];
+        const fieldNamesRow = document.createElement('li');
+        fieldNamesRow.style.display = 'flex';
+        fieldNamesRow.style.listStyle = 'none';
 
+        fieldNames.forEach(fieldName => {
+            const fieldNameElement = document.createElement('div');
+            fieldNameElement.style.flex = '1';
+            fieldNameElement.innerHTML = `<strong>${fieldName}:</strong>`;
+            fieldNamesRow.appendChild(fieldNameElement);
+        });
+
+        studentList.appendChild(fieldNamesRow);
+        // Add student data
+        data.forEach(student => {
+            const listItem = document.createElement('li');
+            listItem.style.display = 'flex';
+            listItem.style.listStyle = 'none';
+            /*
+            // Add a div for the selectable area
+            const selectableArea = document.createElement('div');
+            selectableArea.style.width = '20px'; // Adjust width as needed
+            selectableArea.style.height = '20px'; // Adjust height as needed
+            selectableArea.style.border = '1px solid #ccc'; // Add border for styling
+            selectableArea.style.cursor = 'pointer'; // Change cursor to indicate clickability
+
+            // Add "x" button inside the selectable area
+            const selectButton = document.createElement('span');
+            selectButton.innerHTML = 'x';
+            selectButton.style.visibility = 'hidden'; // Initially hidden
+            selectButton.style.display = 'block'; // Display as a block
+            selectButton.style.margin = 'auto'; // Center the "x" inside the div
+
+            // Add click event listener to toggle visibility
+            selectableArea.addEventListener('click', () => {
+                selectButton.style.visibility = selectButton.style.visibility === 'hidden' ? 'visible' : 'hidden';
+                // Handle selection logic here if needed
+            });
+
+            // Append the "x" button to the selectable area
+            selectableArea.appendChild(selectButton);
+
+            // Append the selectable area to the list item
+            listItem.appendChild(selectableArea);
+            */
+            Object.entries(student).forEach(([key, value]) => {
+                const dataElement = document.createElement('div');
+                dataElement.style.flex = '1';
+                dataElement.style.marginRight = '20px';
+
+                if (key === 'Examinationsdatum') {
+                    const dateInput = document.createElement('input');
+                    dateInput.type = 'date';
+                    dateInput.value = value;
+                    dateInput.addEventListener('input', () => {
+                        // Handle date changes if needed
+                        console.log(dateInput.value);
+                    });
+                    dataElement.appendChild(dateInput);
+                } else {
+                    dataElement.innerHTML = `${value}`;
+                }
+
+                listItem.appendChild(dataElement);
+            });
+
+            studentList.appendChild(listItem);
+        });
+    } catch (error) {
+        console.error('Error fetching students:', error);
+    }
+}
+assignmentDropdown.addEventListener('change', updateStudentList);
 getCourseCodes();
 updateStudentList();
 </script>
 </body>
 </html>
-

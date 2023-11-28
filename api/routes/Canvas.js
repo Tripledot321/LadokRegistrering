@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { CanvasStudentResult, Assignment } = require('../models/CanvasDB');
+const { CanvasStudent, CanvasCourse, Assignment, CanvasStudentResult } = require('../models/CanvasDB');
 
 router.get('/get_Assignments', async (req, res) => {
   try {
@@ -18,6 +18,53 @@ router.get('/get_Assignments', async (req, res) => {
   }
 });
 
+// list students by course code and assignment
+router.get('/getStudents/:courseCode/:assignmentIds', async (req, res) => {
+  try {
+      const { courseCode, assignmentIds } = req.params;
+      const assignmentIdArray = assignmentIds.split(',');
+      // find course by course code
+      const course = await CanvasCourse.findOne({ courseId: courseCode }).populate('assignments');
+      if (!course) {
+        return res.status(404).json({ error: 'kurs finns ej' });
+      }
+      // find assignment by assignment name
+      const assignment = await Assignment.findOne({ assignment: assignmentName, courseId: courseCode });
+
+      if (!assignment) {
+        return res.status(404).json({ error: 'uppgift finns ej' });
+      }
+      // find student result for the selected course and assignment
+      const studentResults = await CanvasStudentResult.find({
+        courseId: courseCode,
+        'grades.assignmentId': { $in: assignmentIdArray },
+    }).populate('studentId');
+      // prepare response
+      const result = studentResults.map((result) => {
+          const studentName = result.studentId.name;
+          const canvasGrade = result.grades.find((grade) => grade.assignmentId.equals(assignment._id))?.grade || '';
+          const ladokGrade = 'Placeholder Textfield'; 
+          const examinationDate = 'Placeholder Date'; 
+          const status = 'Placeholder Label';
+          const information = 'Placeholder Label'; 
+
+          return {
+              'Namn': studentName,
+              'Omdöme i Canvas': canvasGrade,
+              'Betyg i Ladok': ladokGrade,
+              'Examinationsdatum': examinationDate,
+              'Status': status,
+              'Information': information,
+          };
+      });
+
+      res.json(result);
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+/*
 router.get('/get_StudentResult', async (req, res) => {
   try {
     const studentId = req.query.studentId;
@@ -30,10 +77,8 @@ router.get('/get_StudentResult', async (req, res) => {
         select: 'courseName',
       })
       .populate({
-        path: 'grades',
-        populate: {
-          path: 'assignment',
-        },
+        path: 'grades.assignmentId', // Populate the assignmentId field
+        model: 'Assignment', // Specify the model for assignmentId
       });
 
     if (!studentResults || studentResults.length === 0) {
@@ -46,8 +91,9 @@ router.get('/get_StudentResult', async (req, res) => {
     const formattedResults = studentResults.map(result => ({
       CourseCode: result.courseId && result.courseId._id,
       AssignmentID: result.grades.map(assignment => ({
-        _id: assignment.assignment && assignment.assignment._id,
-        assignment: assignment.grades && assignment.grades,
+        _id: assignment.assignmentId && assignment.assignmentId._id, // Use assignmentId
+        assignment: assignment.assignmentId && assignment.assignmentId.assignment,
+        grade: assignment.grade,
       })),
       Grade: result.Grade,
     }));
@@ -61,5 +107,5 @@ router.get('/get_StudentResult', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
+*/
 module.exports = router;
