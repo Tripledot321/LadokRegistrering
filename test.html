@@ -167,8 +167,8 @@ async function getStudentsForCourse(courseCode) {
         const studentList = document.getElementById('studentList');
         studentList.innerHTML = '';
 
-        if (data) {
-            const studentList = document.getElementById('studentList');
+if (data) {
+    const studentList = document.getElementById('studentList');
 
             data.forEach(student => {
         // Create a checkbox for each student
@@ -190,7 +190,7 @@ async function getStudentsForCourse(courseCode) {
         // Add student details to the div
         studentDetailsDiv.innerHTML = `
             <span>${student.studentId}</span>
-            `;
+        `;
 
         // Add existing grades
         student.grades.forEach(grade => {
