@@ -167,7 +167,7 @@ async function getStudentsForCourse(courseCode) {
         const studentList = document.getElementById('studentList');
         studentList.innerHTML = '';
 
-        if (data) {
+if (data) {
     const studentList = document.getElementById('studentList');
 
     data.forEach(student => {
@@ -184,16 +184,40 @@ async function getStudentsForCourse(courseCode) {
         // Create a list item for each student
         const studentOption = document.createElement('li');
 
-        // Add student details to the list item
-        const gradesHTML = student.grades.map(grade => `
-            <span>Assignment: ${grade.assignmentId}</span>
-            <span>Grade: ${grade.grade}</span>
-        `).join('<br>');
+        // Create a div for student details
+        const studentDetailsDiv = document.createElement('div');
 
-        studentOption.innerHTML = `
+        // Add student details to the div
+        studentDetailsDiv.innerHTML = `
             <span>${student.studentId}</span>
-            <div>${gradesHTML}</div>
         `;
+
+        // Add existing grades
+        student.grades.forEach(grade => {
+            studentDetailsDiv.innerHTML += `
+                <div>
+                    <span>Assignment: ${grade.assignmentId}</span>
+                    <span>Grade: ${grade.grade}</span>
+                </div>
+            `;
+        });
+
+        // Add input fields for new grade, date, and status
+        studentDetailsDiv.innerHTML += `
+            <label for="newGrade_${student.studentId}">New Grade:</label>
+            <select id="newGrade_${student.studentId}" name="newGrade">
+                <option value=""> - Select Grade - </option>
+                <option value="G">G</option>
+                <option value="VG">VG</option>
+            </select>
+            <label for="date_${student.studentId}">Date:</label>
+            <input type="date" id="date_${student.studentId}" name="date">
+            <label for="status_${student.studentId}">Status:</label>
+            <input type="text" id="status_${student.studentId}" name="status" placeholder="Enter status">
+        `;
+
+        // Append the div to the list item
+        studentOption.appendChild(studentDetailsDiv);
 
         // Append the checkbox, label, and list item to the student list
         studentList.appendChild(selectCheckbox);
@@ -208,6 +232,20 @@ async function getStudentsForCourse(courseCode) {
         console.error('Error fetching students for the course:', error);
     }
 };
+
+function updateDate() {
+    // Get the selected date from the "Examinationsdatum" input field
+    const examDateInput = document.getElementById('examDate');
+    const selectedDate = examDateInput.value;
+
+    // Get all date input fields in the studentList
+    const dateInputs = document.querySelectorAll('[id^="date_"]');
+
+    // Update each date input field with the selected date
+    dateInputs.forEach(dateInput => {
+        dateInput.value = selectedDate;
+    });
+}
 
 getCourseCodes();
 </script>
