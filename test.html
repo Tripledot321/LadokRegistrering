@@ -185,16 +185,24 @@ async function getStudentsForCourse(courseCode) {
         const studentOption = document.createElement('li');
 
         // Add student details to the list item
-        const gradesHTML = student.grades.map(grade => `
-            <span>Assignment: ${grade.assignmentId}</span>
-            <span>Grade: ${grade.grade}</span>
-        `).join('<br>');
+    // Add student details to the list item horizontally
+    const gradesHTML = student.grades.map(grade => `
+        Assignment: ${grade.assignmentId} Grade: ${grade.grade}
+    `).join(', ');
 
-        studentOption.innerHTML = `
-            <span>${student.studentId}</span>
-            <div>${gradesHTML}</div>
+    studentOption.innerHTML = `
+        <span>${student.studentId}, ${gradesHTML}</span>
+    `;
+        // Add a dropdown for setting the grade
+        const gradeDropdown = document.createElement('select');
+        gradeDropdown.id = `gradeDropdown_${student.studentId}`;
+        gradeDropdown.innerHTML = `
+            <option value="G">G</option>
+            <option value="VG">VG</option>
         `;
 
+        // Append the dropdown to the student entry
+        studentOption.appendChild(gradeDropdown);
         // Append the checkbox, label, and list item to the student list
         studentList.appendChild(selectCheckbox);
         studentList.appendChild(checkboxLabel);
@@ -208,7 +216,23 @@ async function getStudentsForCourse(courseCode) {
         console.error('Error fetching students for the course:', error);
     }
 };
+function sendToLadok() {
+    const selectedGrades = [];
+    const studentList = document.getElementById('studentList');
+    const checkboxes = studentList.querySelectorAll('input[type="checkbox"]:checked');
 
+    checkboxes.forEach(checkbox => {
+        const studentId = checkbox.id.replace('selectCheckbox_', '');
+        const gradeDropdown = document.getElementById(`gradeDropdown_${studentId}`);
+        const selectedGrade = gradeDropdown.value;
+
+        // set studentid & grade to array
+        selectedGrades.push({
+            studentId: studentId,
+            grade: selectedGrade,
+        });
+    });
+}
 getCourseCodes();
 </script>
 </body>
