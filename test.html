@@ -29,6 +29,7 @@
 let selectedCourseCode;
 let moduleOption;
 let selectedStudents = [];
+let assignmentGrade = [];
 
     async function getCourseCodes() {
     try {
@@ -163,7 +164,7 @@ async function getAssignmentsForCourse(courseCode) {
         console.error('Error fetching assignments for the course:', error);
     }
 };
-// Assignment
+
 async function getStudentsForCourse(courseCode) {
     try {
         // Fetch students based on the selected courseCode
@@ -235,7 +236,7 @@ async function getStudentsForCourse(courseCode) {
                     <label for="date_${student.studentId}">Date:</label>
                     <input type="date" id="date_${student.studentId}" name="date">
                     <label for="status_${student.studentId}">Status:</label>
-                    <input type="text" id="status_${student.studentId}" name="status" placeholder="Enter status">
+                    <span id="status_${student.studentId}">-</span> <!-- Status span element -->
                 `;
 
                 // Append the div to the list item
@@ -314,6 +315,10 @@ async function sendToLadok() {
                     throw new Error(`HTTP error! Status: ${ladokSaveResponse.status}`);
                 }
                 console.log('LadokStudentResult saved successfully!');
+                selectedStudents.forEach(student => {
+                const statusSpan = document.getElementById(`status_${student.studentId}`);
+                statusSpan.textContent = 'Klar';
+                });
             } else {
                 console.error(`No itsStudent found for studentId: ${student.studentId}`);
             }
@@ -322,7 +327,6 @@ async function sendToLadok() {
         }
     }
 }
-
 
 getCourseCodes();
 </script>
