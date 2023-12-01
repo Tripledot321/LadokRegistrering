@@ -25,6 +25,12 @@
     <ul id="studentList"></ul>
 
 <script>
+
+let selectedCourseCode;
+let moduleOption;
+let selectedStudents = [];
+let assignmentGrade = [];
+
     async function getCourseCodes() {
     try {
         const response = await fetch('http://localhost:3000/epok/get_AllCourseCodes');
@@ -56,7 +62,7 @@
         });
         // Add event listener for course selection
         courseCodeDropdown.addEventListener('change', () => {
-        const selectedCourseCode = courseCodeDropdown.value;
+        selectedCourseCode = courseCodeDropdown.value;
         getModulesForCourse(selectedCourseCode);
         getAssignmentsForCourse(selectedCourseCode);
         getStudentsForCourse(selectedCourseCode);
@@ -90,7 +96,7 @@ async function getModulesForCourse(courseCode) {
 
         // Add default option
         const defaultModuleOption = document.createElement('option');
-        defaultModuleOption.value = ''; // Adjust to your needs
+        defaultModuleOption.value = '';
         defaultModuleOption.text = '- Välj Modul -';
         moduleDropdown.appendChild(defaultModuleOption);
 
@@ -98,10 +104,17 @@ async function getModulesForCourse(courseCode) {
         if (data.activeModules) {
             // Populate the dropdown with module data
             data.activeModules.forEach(module => {
-                const moduleOption = document.createElement('option');
+                moduleOption = document.createElement('option');
                 moduleOption.value = module.Code; // Adjust to access the appropriate property
                 moduleOption.text = module.Description; // Adjust to access the appropriate property
                 moduleDropdown.appendChild(moduleOption);
+            });
+
+            // Add event listener to the dropdown after all modules have been added
+            moduleDropdown.addEventListener('change', () => {
+                moduleOption = moduleDropdown;
+                console.log('Selected Module Code:', moduleOption);
+                // Add any additional actions you want to perform when the dropdown changes
             });
         } else {
             console.error('No module data found.');
@@ -111,6 +124,7 @@ async function getModulesForCourse(courseCode) {
         console.error('Error fetching modules for the course:', error);
     }
 }
+
 
 async function getAssignmentsForCourse(courseCode) {
     try {
@@ -150,7 +164,7 @@ async function getAssignmentsForCourse(courseCode) {
         console.error('Error fetching assignments for the course:', error);
     }
 };
-// Assignment
+
 async function getStudentsForCourse(courseCode) {
     try {
         // Fetch students based on the selected courseCode
@@ -167,71 +181,80 @@ async function getStudentsForCourse(courseCode) {
         const studentList = document.getElementById('studentList');
         studentList.innerHTML = '';
 
-if (data) {
-    const studentList = document.getElementById('studentList');
+        if (data) {
+            const studentList = document.getElementById('studentList');
 
             data.forEach(student => {
-        // Create a checkbox for each student
-        const selectCheckbox = document.createElement('input');
-        selectCheckbox.type = 'checkbox';
-        selectCheckbox.id = `selectCheckbox_${student.studentId}`;
+                // Create a checkbox for each student
+                const selectCheckbox = document.createElement('input');
+                selectCheckbox.type = 'checkbox';
+                selectCheckbox.id = `selectCheckbox_${student.studentId}`;
+                selectCheckbox.addEventListener('change', () => {
+                    if (selectCheckbox.checked) {
+                        // Add the selected student to the array
+                        selectedStudents.push(student);
+                    } else {
+                        // Remove the unselected student from the array
+                        selectedStudents = selectedStudents.filter(selectedStudent => selectedStudent.studentId !== student.studentId);
+                    }
+                });
 
-        // Create a label for the checkbox
-        const checkboxLabel = document.createElement('label');
-        checkboxLabel.textContent = 'Select';
-        checkboxLabel.htmlFor = selectCheckbox.id;
+                // Create a label for the checkbox
+                const checkboxLabel = document.createElement('label');
+                checkboxLabel.textContent = 'Select';
+                checkboxLabel.htmlFor = selectCheckbox.id;
 
-        // Create a list item for each student
-        const studentOption = document.createElement('li');
+                // Create a list item for each student
+                const studentOption = document.createElement('li');
 
-        // Create a div for student details
-        const studentDetailsDiv = document.createElement('div');
+                // Create a div for student details
+                const studentDetailsDiv = document.createElement('div');
 
-        // Add student details to the div
-        studentDetailsDiv.innerHTML = `
-            <span>${student.studentId}</span>
-        `;
+                // Add student details to the div
+                studentDetailsDiv.innerHTML = `
+                    <span>${student.studentId}</span>
+                `;
 
-        // Add existing grades
-        student.grades.forEach(grade => {
-            studentDetailsDiv.innerHTML += `
-                <div>
-                    <span>Assignment: ${grade.assignmentId}</span>
-                    <span>Grade: ${grade.grade}</span>
-                </div>
-            `;
-        });
+                // Add existing grades
+                student.grades.forEach(grade => {
+                    studentDetailsDiv.innerHTML += `
+                        <div>
+                            <span>Assignment: ${grade.assignmentId}</span>
+                            <span>Grade: ${grade.grade}</span>
+                        </div>
+                    `;
+                });
 
-        // Add input fields for new grade, date, and status
-        studentDetailsDiv.innerHTML += `
-            <label for="newGrade_${student.studentId}">New Grade:</label>
-            <select id="newGrade_${student.studentId}" name="newGrade">
-                <option value=""> - Select Grade - </option>
-                <option value="G">G</option>
-                <option value="VG">VG</option>
-            </select>
-            <label for="date_${student.studentId}">Date:</label>
-            <input type="date" id="date_${student.studentId}" name="date">
-            <label for="status_${student.studentId}">Status:</label>
-            <input type="text" id="status_${student.studentId}" name="status" placeholder="Enter status">
-        `;
+                // Add input fields for new grade, date, and status
+                studentDetailsDiv.innerHTML += `
+                    <label for="newGrade_${student.studentId}">New Grade:</label>
+                    <select id="newGrade_${student.studentId}" name="newGrade">
+                        <option value=""> - Select Grade - </option>
+                        <option value="G">G</option>
+                        <option value="VG">VG</option>
+                    </select>
+                    <label for="date_${student.studentId}">Date:</label>
+                    <input type="date" id="date_${student.studentId}" name="date">
+                    <label for="status_${student.studentId}">Status:</label>
+                    <span id="status_${student.studentId}">-</span> <!-- Status span element -->
+                `;
 
-        // Append the div to the list item
-        studentOption.appendChild(studentDetailsDiv);
+                // Append the div to the list item
+                studentOption.appendChild(studentDetailsDiv);
 
-        // Append the checkbox, label, and list item to the student list
-        studentList.appendChild(selectCheckbox);
-        studentList.appendChild(checkboxLabel);
-        studentList.appendChild(studentOption);
-    });
-} else {
-    console.error('No students found.');
-}
+                // Append the checkbox, label, and list item to the student list
+                studentList.appendChild(selectCheckbox);
+                studentList.appendChild(checkboxLabel);
+                studentList.appendChild(studentOption);
+            });
+        } else {
+            console.error('No students found.');
+        }
 
     } catch (error) {
         console.error('Error fetching students for the course:', error);
     }
-};
+}
 
 function updateDate() {
     // Get the selected date from the "Examinationsdatum" input field
@@ -246,6 +269,65 @@ function updateDate() {
         dateInput.value = selectedDate;
     });
 }
+
+async function sendToLadok() {
+    console.log("click");
+    console.log(moduleOption.value);
+    console.log(selectedCourseCode);
+    console.log('Selected students:', selectedStudents);
+
+    // Iterate over selected students
+    for (const student of selectedStudents) {
+        try {
+            // Retrieve the personnummer from the ITSAdmin API
+            const itsStudentResponse = await fetch(`http://localhost:3000/itsadmin/get_PNR?ItsStudentId=${student.studentId}`);
+            const itsStudentData = await itsStudentResponse.json();
+
+            if (itsStudentData && itsStudentData.personnummer) {
+                const personnummer = itsStudentData.personnummer;
+
+                // Retrieve the values for date and grade for each student
+                const dateInput = document.getElementById(`date_${student.studentId}`);
+                const gradeSelect = document.getElementById(`newGrade_${student.studentId}`);
+
+                const selectedDate = dateInput.value;
+                const selectedGrade = gradeSelect.value;
+
+                // Log or perform actions with the retrieved values
+                console.log(`Student ${student.studentId} (Personnummer: ${personnummer}): Date - ${selectedDate}, Grade - ${selectedGrade}`);
+
+                // Make a fetch request to the Ladok API to save the student result
+                const ladokSaveResponse = await fetch('http://localhost:3000/Ladok/saveStudentResult', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        personnummer: personnummer,
+                        courseCode: selectedCourseCode,
+                        module: moduleOption.value,
+                        date: selectedDate,
+                        grade: selectedGrade,
+                    }),
+                });
+
+                if (!ladokSaveResponse.ok) {
+                    throw new Error(`HTTP error! Status: ${ladokSaveResponse.status}`);
+                }
+                console.log('LadokStudentResult saved successfully!');
+                selectedStudents.forEach(student => {
+                const statusSpan = document.getElementById(`status_${student.studentId}`);
+                statusSpan.textContent = 'Klar';
+                });
+            } else {
+                console.error(`No itsStudent found for studentId: ${student.studentId}`);
+            }
+        } catch (error) {
+            console.error('Error querying ITSAdmin API or saving LadokStudentResult:', error);
+        }
+    }
+}
+
 
 getCourseCodes();
 </script>

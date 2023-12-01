@@ -42,4 +42,7 @@ app.use('/ITSAdmin', itsRouter);
 const canvasRouter = require('./api/routes/Canvas');
 app.use('/canvas', canvasRouter);
 
+const ladokRouter = require('./api/routes/Ladok');
+app.use('/ladok', ladokRouter);
+
 module.exports = app;
