@@ -1,61 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Betygsregistrering</title>
 </head>
 <body>
-  
-    <form id="studentResultForm">
-        <label for="studentId">StudentID:</label>
-        <input type="text" id="studentId" name="studentId" required>
-        <button type="button" onclick="getStudentResult()">Hämta Studentresultat</button>
-     </form>
+    <label for="courseCodeDropdown">Kurskod:</label>
+    <select id="courseCodeDropdown"></select>
 
-  <div id="resultContainer"></div>
+    <label for="assignmentDropdown">Uppgift i Canvas:</label>
+    <select id="assignmentDropdown" multiple></select>
 
-  <script>
-    async function getStudentResult() {
-      const studentId = document.getElementById('studentId').value;
+    <label for="moduleDropdown">Modul i Ladok:</label>
+    <select id="moduleDropdown"></select>
 
-      try {
-        const response = await fetch(`http://localhost:3000/canvas/get_StudentResult?studentId=${studentId}`);
-        const data = await response.json();
+    <label for="examDate">Examinationsdatum:</label>
+    <input type="date" id="examDate" />
 
-        if (response.ok) {
-          displayResults(data);
-        } else {
-          displayError(data.message);
+    <button type="button" onclick="updateDate()">Uppdatera datum</button>
+
+    <button type="button" onclick="sendToLadok()">Skicka in</button>
+
+    <ul id="studentList"></ul>
+
+<script>
+    let assignmentIds = [];
+    async function getCourseCodes() {
+    try {
+        const response = await fetch('http://localhost:3000/epok/get_AllCourseCodes');
+        console.log('Response:', response);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      } catch (error) {
-        console.error('Error:', error);
-        displayError('Internal Server Error');
-      }
-    }
 
-    function displayResults(data) {
-      const resultContainer = document.getElementById('resultContainer');
-      resultContainer.innerHTML = '';
+        const data = await response.json();
+        console.log('Data:', data);
 
-      if (data.studentResults && data.studentResults.length > 0) {
-        const resultList = document.createElement('ul');
+        const courses = data.courseCodes;
 
-        data.studentResults.forEach(result => {
-          const listItem = document.createElement('li');
-          listItem.textContent = `Kurskod: ${result.CourseCode}, AssignmentID: [${result.AssignmentID.join(', ')}], Grade: ${result.Grade}`;
-          resultList.appendChild(listItem);
+        const courseCodeDropdown = document.getElementById('courseCodeDropdown');
+        courseCodeDropdown.innerHTML = '';
+
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = ''; // Adjust to your needs
+        defaultOption.text = '- Välj Kurs -';
+        courseCodeDropdown.appendChild(defaultOption);
+
+        courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course;
+            option.text = course;
+            courseCodeDropdown.appendChild(option);
+        });
+        // Add event listener for course selection
+        courseCodeDropdown.addEventListener('change', () => {
+        const selectedCourseCode = courseCodeDropdown.value;
+        getModulesForCourse(selectedCourseCode);
+        getAssignmentsForCourse(selectedCourseCode);
+ 
         });
 
-        resultContainer.appendChild(resultList);
-      } else {
-        resultContainer.textContent = 'Inga resultat för studenten.';
-      }
+        // Initial call to getModulesForCourse with the default course code (empty string)
+        getModulesForCourse('');
+        getAssignmentsForCourse('');
+        getStudentsForCourse('');
+    } catch (error) {
+        console.error('Error:', error);
     }
+}
 
-    function displayError(message) {
-      const resultContainer = document.getElementById('resultContainer');
-      resultContainer.innerHTML = `<p style="color: red;">Error: ${message}</p>`;
+async function getModulesForCourse(courseCode) {
+    try {
+        // Fetch modules based on the selected courseCode
+        const response = await fetch(`http://localhost:3000/epok/get_Module?courseCode=${courseCode}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        // Parse the response
+        const data = await response.json();
+        console.log('Modules:', data.activeModules);
+
+        // Populate the module dropdown
+        const moduleDropdown = document.getElementById('moduleDropdown');
+        moduleDropdown.innerHTML = '';
+
+        // Add default option
+        const defaultModuleOption = document.createElement('option');
+        defaultModuleOption.value = ''; // Adjust to your needs
+        defaultModuleOption.text = '- Välj Modul -';
+        moduleDropdown.appendChild(defaultModuleOption);
+
+        // Check if activeModules is defined before using it
+        if (data.activeModules) {
+            // Populate the dropdown with module data
+            data.activeModules.forEach(module => {
+                const moduleOption = document.createElement('option');
+                moduleOption.value = module.Code; // Adjust to access the appropriate property
+                moduleOption.text = module.Description; // Adjust to access the appropriate property
+                moduleDropdown.appendChild(moduleOption);
+            });
+        } else {
+            console.error('No module data found.');
+        }
+
+    } catch (error) {
+        console.error('Error fetching modules for the course:', error);
     }
-  </script>
+}
+
+async function getAssignmentsForCourse(courseCode) {
+    try {
+        // Fetch modules based on the selected courseCode
+        const response = await fetch(`http://localhost:3000/canvas/get_Assignments?courseCode=${courseCode}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        // Parse the response
+        const data = await response.json();
+        console.log('Assignment:', data.assignments);
+        // Populate the module dropdown
+        const assignmentDropdown = document.getElementById('assignmentDropdown');
+        assignmentDropdown.innerHTML = '';
+
+        // Add default option
+        const defaultAssignmentOption = document.createElement('option');
+        defaultAssignmentOption.value = ''; // Adjust to your needs
+        defaultAssignmentOption.text = '- Välj Assignments -';
+        assignmentDropdown.appendChild(defaultAssignmentOption);
+
+        // Check if activeModules is defined before using it
+        assignmentIds = [];
+        if (data.assignments) {
+            data.assignments.forEach(assignment => {
+            const assignmentOption = document.createElement('option');
+            assignmentOption.value = assignment.assignmentId;
+            console.log('Assignment IDs inside loop:', assignment._id);
+            assignmentOption.text = assignment._id;
+            assignmentDropdown.appendChild(assignmentOption);
+            assignmentIds.push(assignment._id);
+            });
+        assignmentDropdown.multiple = true;
+        console.log('Assignment IDs after loop:', assignmentIds);
+        assignmentDropdown.addEventListener('change', () => {
+                const selectedAssignmentIndex = assignmentDropdown.selectedIndex-1;
+
+                // Ensure an option is selected
+                if (selectedAssignmentIndex !== -1) {
+                    const selectedAssignmentId = assignmentIds[selectedAssignmentIndex];
+
+                    // Use the selectedAssignmentId as needed
+                    console.log('Selected Assignment ID:', selectedAssignmentId);
+                    getStudentsForCourse(courseCode, selectedAssignmentId);
+                } else {
+                    console.error('No assignment selected.');
+                }
+            });
+        } else {
+            console.error('No assignments found.');
+        }
+
+
+    } catch (error) {
+        console.error('Error fetching assignments for the course:', error);
+    }
+};
+// Assignment
+async function getStudentsForCourse(courseCode, assignmentId) {
+    try {
+        console.log('assignmentID inside getStudentsForCourse:', assignmentId)
+        // Fetch students based on the selected courseCode
+        const response = await fetch(`http://localhost:3000/canvas/get_StudentList?courseCode=${courseCode}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        // Parse the response
+        const data = await response.json();
+        console.log('Students:', data);
+        
+        // Populate the module dropdown
+        const studentList = document.getElementById('studentList');
+        studentList.innerHTML = '';
+
+        if (data) {
+            const filteredStudents = data.filter(student => {
+                return student.grades.some(grade => grade.assignmentId === assignmentId);
+            });
+
+            filteredStudents.forEach(student => {
+                // Create a checkbox for each student
+                const selectCheckbox = document.createElement('input');
+                selectCheckbox.type = 'checkbox';
+                selectCheckbox.id = `selectCheckbox_${student.studentId}`;
+
+                // Create a label for the checkbox
+                const checkboxLabel = document.createElement('label');
+                checkboxLabel.textContent = 'Select';
+                checkboxLabel.htmlFor = selectCheckbox.id;
+
+                // Create a list item for each student
+                const studentOption = document.createElement('li');
+
+                // Create a div for student details
+                const studentDetailsDiv = document.createElement('div');
+
+                // Add student details to the div
+                studentDetailsDiv.innerHTML = `
+                    <span>${student.studentId}</span>
+                `;
+
+                // Add existing grades
+                student.grades.forEach(grade => {
+                    if (grade.assignmentId === assignmentId) {
+                        studentDetailsDiv.innerHTML += `
+                            <div>
+                                <span>Assignment: ${grade.assignmentId}</span>
+                                <span>Grade: ${grade.grade}</span>
+                            </div>
+                        `;
+                    }
+                });
+
+                // Add input fields for new grade, date, and status
+                studentDetailsDiv.innerHTML += `
+                    <label for="newGrade_${student.studentId}">New Grade:</label>
+                    <select id="newGrade_${student.studentId}" name="newGrade">
+                        <option value=""> - Select Grade - </option>
+                        <option value="G">G</option>
+                        <option value="VG">VG</option>
+                    </select>
+                    <label for="date_${student.studentId}">Date:</label>
+                    <input type="date" id="date_${student.studentId}" name="date">
+                    <label for="status_${student.studentId}">Status:</label>
+                    <input type="text" id="status_${student.studentId}" name="status" placeholder="Enter status">
+                `;
+
+                // Append the div to the list item
+                studentOption.appendChild(studentDetailsDiv);
+
+                // Append the checkbox, label, and list item to the student list
+                studentList.appendChild(selectCheckbox);
+                studentList.appendChild(checkboxLabel);
+                studentList.appendChild(studentOption);
+            });
+        } else {
+            console.error('No students found.');
+        }
+
+    } catch (error) {
+        console.error('Error fetching students for the course:', error);
+    }
+};
+
+function updateDate() {
+    // Get the selected date from the "Examinationsdatum" input field
+    const examDateInput = document.getElementById('examDate');
+    const selectedDate = examDateInput.value;
+
+    // Get all date input fields in the studentList
+    const dateInputs = document.querySelectorAll('[id^="date_"]');
+
+    // Update each date input field with the selected date
+    dateInputs.forEach(dateInput => {
+        dateInput.value = selectedDate;
+    });
+}
+
+getCourseCodes();
+</script>
 </body>
 </html>

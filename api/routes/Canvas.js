@@ -18,53 +18,6 @@ router.get('/get_Assignments', async (req, res) => {
   }
 });
 
-// list students by course code and assignment
-router.get('/getStudents/:courseCode/:assignmentIds', async (req, res) => {
-  try {
-      const { courseCode, assignmentIds } = req.params;
-      const assignmentIdArray = assignmentIds.split(',');
-      // find course by course code
-      const course = await CanvasCourse.findOne({ courseId: courseCode }).populate('assignments');
-      if (!course) {
-        return res.status(404).json({ error: 'kurs finns ej' });
-      }
-      // find assignment by assignment name
-      const assignment = await Assignment.findOne({ assignment: assignmentName, courseId: courseCode });
-
-      if (!assignment) {
-        return res.status(404).json({ error: 'uppgift finns ej' });
-      }
-      // find student result for the selected course and assignment
-      const studentResults = await CanvasStudentResult.find({
-        courseId: courseCode,
-        'grades.assignmentId': { $in: assignmentIdArray },
-    }).populate('studentId');
-      // prepare response
-      const result = studentResults.map((result) => {
-          const studentName = result.studentId.name;
-          const canvasGrade = result.grades.find((grade) => grade.assignmentId.equals(assignment._id))?.grade || '';
-          const ladokGrade = 'Placeholder Textfield'; 
-          const examinationDate = 'Placeholder Date'; 
-          const status = 'Placeholder Label';
-          const information = 'Placeholder Label'; 
-
-          return {
-              'Namn': studentName,
-              'Omdöme i Canvas': canvasGrade,
-              'Betyg i Ladok': ladokGrade,
-              'Examinationsdatum': examinationDate,
-              'Status': status,
-              'Information': information,
-          };
-      });
-
-      res.json(result);
-  } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
 router.get('/get_StudentList/', async (req, res) => {
   try {
     const courseCode = req.query.courseCode;
