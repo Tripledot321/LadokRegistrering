@@ -25,6 +25,10 @@
     <ul id="studentList"></ul>
 
 <script>
+    let selectedCourseCode;
+    let moduleOption;
+    let selectedStudents = [];
+    let assignmentGrade = [];
     let assignmentIds = [];
     async function getCourseCodes() {
     try {
@@ -57,10 +61,9 @@
         });
         // Add event listener for course selection
         courseCodeDropdown.addEventListener('change', () => {
-        const selectedCourseCode = courseCodeDropdown.value;
+        selectedCourseCode = courseCodeDropdown.value;
         getModulesForCourse(selectedCourseCode);
         getAssignmentsForCourse(selectedCourseCode);
- 
         });
 
         // Initial call to getModulesForCourse with the default course code (empty string)
@@ -91,7 +94,7 @@ async function getModulesForCourse(courseCode) {
 
         // Add default option
         const defaultModuleOption = document.createElement('option');
-        defaultModuleOption.value = ''; // Adjust to your needs
+        defaultModuleOption.value = '';
         defaultModuleOption.text = '- Välj Modul -';
         moduleDropdown.appendChild(defaultModuleOption);
 
@@ -99,10 +102,17 @@ async function getModulesForCourse(courseCode) {
         if (data.activeModules) {
             // Populate the dropdown with module data
             data.activeModules.forEach(module => {
-                const moduleOption = document.createElement('option');
+                moduleOption = document.createElement('option');
                 moduleOption.value = module.Code; // Adjust to access the appropriate property
                 moduleOption.text = module.Description; // Adjust to access the appropriate property
                 moduleDropdown.appendChild(moduleOption);
+            });
+
+            // Add event listener to the dropdown after all modules have been added
+            moduleDropdown.addEventListener('change', () => {
+                moduleOption = moduleDropdown;
+                console.log('Selected Module Code:', moduleOption);
+                // Add any additional actions you want to perform when the dropdown changes
             });
         } else {
             console.error('No module data found.');
@@ -174,10 +184,10 @@ async function getAssignmentsForCourse(courseCode) {
 // Assignment
 async function getStudentsForCourse(courseCode, assignmentId) {
     try {
-        console.log('assignmentID inside getStudentsForCourse:', assignmentId)
+        console.log('assignmentID inside getStudentsForCourse:', assignmentId);
         // Fetch students based on the selected courseCode
         const response = await fetch(`http://localhost:3000/canvas/get_StudentList?courseCode=${courseCode}`);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -185,7 +195,7 @@ async function getStudentsForCourse(courseCode, assignmentId) {
         // Parse the response
         const data = await response.json();
         console.log('Students:', data);
-        
+
         // Populate the module dropdown
         const studentList = document.getElementById('studentList');
         studentList.innerHTML = '';
@@ -200,6 +210,17 @@ async function getStudentsForCourse(courseCode, assignmentId) {
                 const selectCheckbox = document.createElement('input');
                 selectCheckbox.type = 'checkbox';
                 selectCheckbox.id = `selectCheckbox_${student.studentId}`;
+                selectCheckbox.addEventListener('change', () => {
+                    if (selectCheckbox.checked) {
+                        // Add the selected student to the array
+                        selectedStudents.push(student);
+                    } else {
+                        // Remove the unselected student from the array
+                        selectedStudents = selectedStudents.filter(
+                            selectedStudent => selectedStudent.studentId !== student.studentId
+                        );
+                    }
+                });
 
                 // Create a label for the checkbox
                 const checkboxLabel = document.createElement('label');
@@ -217,7 +238,7 @@ async function getStudentsForCourse(courseCode, assignmentId) {
                     <span>${student.studentId}</span>
                 `;
 
-                // Add existing grades
+                // Add existing grades for the specified assignmentId
                 student.grades.forEach(grade => {
                     if (grade.assignmentId === assignmentId) {
                         studentDetailsDiv.innerHTML += `
@@ -240,7 +261,7 @@ async function getStudentsForCourse(courseCode, assignmentId) {
                     <label for="date_${student.studentId}">Date:</label>
                     <input type="date" id="date_${student.studentId}" name="date">
                     <label for="status_${student.studentId}">Status:</label>
-                    <input type="text" id="status_${student.studentId}" name="status" placeholder="Enter status">
+                    <span id="status_${student.studentId}">-</span> <!-- Status span element -->
                 `;
 
                 // Append the div to the list item
@@ -254,11 +275,10 @@ async function getStudentsForCourse(courseCode, assignmentId) {
         } else {
             console.error('No students found.');
         }
-
     } catch (error) {
         console.error('Error fetching students for the course:', error);
     }
-};
+}
 
 function updateDate() {
     // Get the selected date from the "Examinationsdatum" input field
@@ -273,6 +293,65 @@ function updateDate() {
         dateInput.value = selectedDate;
     });
 }
+
+async function sendToLadok() {
+    console.log("click");
+    console.log(moduleOption.value);
+    console.log(selectedCourseCode);
+    console.log('Selected students:', selectedStudents);
+
+    // Iterate over selected students
+    for (const student of selectedStudents) {
+        try {
+            // Retrieve the personnummer from the ITSAdmin API
+            const itsStudentResponse = await fetch(`http://localhost:3000/itsadmin/get_PNR?ItsStudentId=${student.studentId}`);
+            const itsStudentData = await itsStudentResponse.json();
+
+            if (itsStudentData && itsStudentData.personnummer) {
+                const personnummer = itsStudentData.personnummer;
+
+                // Retrieve the values for date and grade for each student
+                const dateInput = document.getElementById(`date_${student.studentId}`);
+                const gradeSelect = document.getElementById(`newGrade_${student.studentId}`);
+
+                const selectedDate = dateInput.value;
+                const selectedGrade = gradeSelect.value;
+
+                // Log or perform actions with the retrieved values
+                console.log(`Student ${student.studentId} (Personnummer: ${personnummer}): Date - ${selectedDate}, Grade - ${selectedGrade}`);
+
+                // Make a fetch request to the Ladok API to save the student result
+                const ladokSaveResponse = await fetch('http://localhost:3000/Ladok/saveStudentResult', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        personnummer: personnummer,
+                        courseCode: selectedCourseCode,
+                        module: moduleOption.value,
+                        date: selectedDate,
+                        grade: selectedGrade,
+                    }),
+                });
+
+                if (!ladokSaveResponse.ok) {
+                    throw new Error(`HTTP error! Status: ${ladokSaveResponse.status}`);
+                }
+                console.log('LadokStudentResult saved successfully!');
+                selectedStudents.forEach(student => {
+                const statusSpan = document.getElementById(`status_${student.studentId}`);
+                statusSpan.textContent = 'Klar';
+                });
+            } else {
+                console.error(`No itsStudent found for studentId: ${student.studentId}`);
+            }
+        } catch (error) {
+            console.error('Error querying ITSAdmin API or saving LadokStudentResult:', error);
+        }
+    }
+}
+
 
 getCourseCodes();
 </script>
